@@ -999,7 +999,7 @@ def _do_subject_dartelnorm2mni(subject_data,
     # resample func if necessary
     if not func_write_voxel_sizes is None:
         vox_dims = get_vox_dims(subject_data.func[0])
-        if func_write_voxel_sizes != vox_dims:
+        if np.all(np.array(func_write_voxel_sizes) != np.array(vox_dims)):
             _resample_img = lambda input_filename: resample_img(
                 input_filename, func_write_voxel_sizes,
                 output_filename=os.path.join(
