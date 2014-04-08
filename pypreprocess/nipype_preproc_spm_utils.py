@@ -970,16 +970,31 @@ def _do_subject_dartelnorm2mni(subject_data,
         )
     subject_data.anat = dartelnorm2mni_result.outputs.normalized_files
 
+    # oversample the functional data to match anat resolution
+    func = []
+    func_write_voxel_sizes = np.abs(np.diag(
+        nibabel.load(subject_data.func[0]).get_affine())[:-1])
+    anat_voxel_sizes = np.abs(np.diag(
+        nibabel.load(subject_data.anat).get_affine())[:-1])
+    for input_filename in subject_data.func:
+        func.append(resample_img(
+            input_filename, anat_voxel_sizes,
+            output_filename=os.path.join(
+                    os.path.dirname(input_filename),
+                    "oversampled_" + os.path.basename(input_filename))))
+    subject_data.func = func
+
     # warp functional image into MNI space
-    # functional_file = do_3Dto4D_merge(functional_file)
-    func_write_voxel_sizes = compute_output_voxel_size(
-        subject_data.func, func_write_voxel_sizes)
-    createwarped_result = createwarped(
-        image_files=subject_data.func,
+    dartelnorm2mni_result = dartelnorm2mni(
+        apply_to_files=subject_data.func,
         flowfield_files=subject_data.dartel_flow_fields,
-        ignore_exception=False
-        )
-    subject_data.func = createwarped_result.outputs.warped_files
+        template_file=template_file,
+        ignore_exception=False,
+        modulate=False,  # don't modulate
+        fwhm=0.,  # don't smooth
+        **tricky_kwargs)
+
+    subject_data.func = dartelnorm2mni_result.outputs.normalized_files
 
     # resample func if necessary
     if not func_write_voxel_sizes is None:
