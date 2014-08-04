@@ -121,7 +121,7 @@ def preproc_dataset(data_dir, output_dir,
             subject_data.output_dir = os.path.join(output_dir, subject_id)
             yield subject_data
 
-    return do_subjects_preproc(
+    preproc = do_subjects_preproc(
         subject_factory(),
         n_jobs=n_jobs,
         dataset_id=dataset_id,
@@ -131,3 +131,47 @@ def preproc_dataset(data_dir, output_dir,
         dataset_description=DATASET_DESCRIPTION,
         # caching=False,
         )
+
+    return preproc
+
+
+def _save_to_layout(data_dir, output_dir, preproc):
+    """Function to hard link preproc data to an openfmri-like layout.
+    """
+    study_id = os.path.split(data_dir)[1]
+    base_openfmri = _check_dir(os.path.join(output_dir, '.openfmri', study_id))
+
+    # first copy top study metadata
+    models_dir = _check_dir(os.path.join(base_openfmri, 'models', 'model001'))
+    models_files = glob.glob(os.path.join(data_dir, 'models',
+                                          'model001', '*.txt'))
+    _link_files(models_dir, models_files)
+
+    txt_files = glob.glob(os.path.join(data_dir, '*.txt'))
+    _link_files(base_openfmri, txt_files)
+
+    # subject level data
+    for subject_dir in glob.glob(os.path.join(output_dir, 'sub???')):
+        subject_id = os.path.split(subject_dir)[1]
+        onsets = os.path.join(subject_dir, 'model', 'model001', 'onsets', '*')
+        for session_dir in glob.glob(onsets):
+            session_id = os.path.split(session_dir)[1]
+            onsets_dir = _check_dir(os.path.join(
+                base_openfmri, subject_id,
+                'model', 'model001', 'onsets', session_id))
+            onsets_files = glob.glob(os.path.join(session_dir, '*.txt'))
+            _link_files(onsets_dir, onsets_files)
+
+
+def _check_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
+
+
+def _link_files(dest_dir, files):
+    for f_src in files:
+        f_dest = os.path.join(dest_dir, os.path.split(f_src)[1])
+        if os.path.exists(f_dest):
+            os.remove(f_dest)
+        os.link(f_src, f_dest)
