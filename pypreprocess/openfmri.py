@@ -12,7 +12,7 @@ DATASET_DESCRIPTION = """\
 """
 
 
-def preproc_dataset(data_dir, output_dir,
+def preproc_dataset(data_dir, output_dir, alt_output_dir=None,
                     ignore_subjects=None, restrict_subjects=None,
                     delete_orient=False, dartel=False,
                     n_jobs=-1):
@@ -26,6 +26,10 @@ def preproc_dataset(data_dir, output_dir,
         i.e., /path/to/dir/{dataset_id}.
     output_dir: str
         Path of output directory.
+    alt_output_dir: str or None
+        Path of the base output directory following the openfmri layout.
+        If None will default to {output_dir}/.openfmri/{dataset_id}. If
+        not None will create an directory at {alt_output_dir}/{dataset_id}.
     ignore_subjects: list or None
         List of subject identifiers not to process.
     restrict_subjects: list or None
@@ -132,35 +136,64 @@ def preproc_dataset(data_dir, output_dir,
         # caching=False,
         )
 
+    _save_to_layout(data_dir, output_dir, preproc, alt_output_dir)
+
     return preproc
 
 
-def _save_to_layout(data_dir, output_dir, preproc):
+def _save_to_layout(data_dir, preproc_dir, preproc, base_output=None):
     """Function to hard link preproc data to an openfmri-like layout.
     """
-    study_id = os.path.split(data_dir)[1]
-    base_openfmri = _check_dir(os.path.join(output_dir, '.openfmri', study_id))
+    study_id = os.path.split(data_dir.strip('/'))[1]
+    if base_output is None:
+        base_output = _check_dir(
+            os.path.join(preproc_dir, '.openfmri', study_id))
+    else:
+        base_output = _check_dir(os.path.join(base_output, study_id))
+
+    # index preproc with subject_id
+    preproc = dict([(s.subject_id, s) for s in preproc])
 
     # first copy top study metadata
-    models_dir = _check_dir(os.path.join(base_openfmri, 'models', 'model001'))
+    models_dir = _check_dir(os.path.join(base_output, 'models', 'model001'))
     models_files = glob.glob(os.path.join(data_dir, 'models',
                                           'model001', '*.txt'))
     _link_files(models_dir, models_files)
 
     txt_files = glob.glob(os.path.join(data_dir, '*.txt'))
-    _link_files(base_openfmri, txt_files)
+    _link_files(base_output, txt_files)
 
     # subject level data
-    for subject_dir in glob.glob(os.path.join(output_dir, 'sub???')):
+    for subject_dir in glob.glob(os.path.join(preproc_dir, 'sub???')):
         subject_id = os.path.split(subject_dir)[1]
+
+        # link onsets from data folder
         onsets = os.path.join(subject_dir, 'model', 'model001', 'onsets', '*')
         for session_dir in glob.glob(onsets):
             session_id = os.path.split(session_dir)[1]
             onsets_dir = _check_dir(os.path.join(
-                base_openfmri, subject_id,
+                base_output, subject_id,
                 'model', 'model001', 'onsets', session_id))
             onsets_files = glob.glob(os.path.join(session_dir, '*.txt'))
             _link_files(onsets_dir, onsets_files)
+
+        # link data from preproc folders
+        sub_preproc = preproc[subject_id]
+
+        anat_dir = _check_dir(os.path.join(
+            base_output, subject_id,
+            'model', 'model001', 'anatomy'))
+        _link_file(anat_dir, sub_preproc.anat, 'highres001.nii')
+
+        for session_id, func, motion in zip(
+                sub_preproc.session_id,
+                sub_preproc.func,
+                sub_preproc.realignment_parameters):
+            session_dir = _check_dir(os.path.join(
+                base_output, subject_id,
+                'model', 'model001', 'BOLD', session_id))
+            _link_file(session_dir, func, 'bold.nii')
+            _link_file(session_dir, motion, 'motion.txt')
 
 
 def _check_dir(path):
@@ -175,3 +208,11 @@ def _link_files(dest_dir, files):
         if os.path.exists(f_dest):
             os.remove(f_dest)
         os.link(f_src, f_dest)
+
+
+def _link_file(dest_dir, src, fname=None):
+    fname = os.path.split(src)[1] if fname is None else fname
+    dest = os.path.join(dest_dir, fname)
+    if os.path.exists(dest):
+        os.remove(dest)
+    os.link(src, dest)
