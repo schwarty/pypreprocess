@@ -28,7 +28,7 @@ def preproc_dataset(data_dir, output_dir, open_output=None,
         Path of output directory.
     open_output: str or None
         Path of the base output directory following the openfmri layout.
-        If None will default to {output_dir}/.openfmri/{dataset_id}. If
+        If None will default to {output_dir}/../.openfmri/{dataset_id}. If
         not None will create an directory at {open_output}/{dataset_id}.
     ignore_subjects: list or None
         List of subject identifiers not to process.
@@ -147,7 +147,7 @@ def _save_to_layout(data_dir, preproc_dir, preproc, base_output=None):
     study_id = os.path.split(data_dir.rstrip('/'))[1]
     if base_output is None:
         base_output = _check_dir(
-            os.path.join(preproc_dir, '.openfmri', study_id))
+            os.path.join(os.path.split(preproc_dir)[0], '.openfmri', study_id))
     else:
         base_output = _check_dir(os.path.join(base_output, study_id))
 

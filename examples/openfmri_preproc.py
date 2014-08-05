@@ -49,7 +49,7 @@ parser.add_option(
     '-l', '--open-output', dest='open_output',
     default=None, help=('Store the preproc results following '
                         'the openfmri layout at a custom location. '
-                        'Defaults to {output_dir}/.openfmri/{dataset_id}'))
+                        'Defaults to {output_dir}/../.openfmri/{dataset_id}'))
 
 parser.add_option(
     '-n', '--n-jobs', dest='n_jobs', type='int',
