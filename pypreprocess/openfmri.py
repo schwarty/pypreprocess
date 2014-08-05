@@ -12,7 +12,7 @@ DATASET_DESCRIPTION = """\
 """
 
 
-def preproc_dataset(data_dir, output_dir, alt_output_dir=None,
+def preproc_dataset(data_dir, output_dir, open_output=None,
                     ignore_subjects=None, restrict_subjects=None,
                     delete_orient=False, dartel=False,
                     n_jobs=-1):
@@ -26,10 +26,10 @@ def preproc_dataset(data_dir, output_dir, alt_output_dir=None,
         i.e., /path/to/dir/{dataset_id}.
     output_dir: str
         Path of output directory.
-    alt_output_dir: str or None
+    open_output: str or None
         Path of the base output directory following the openfmri layout.
         If None will default to {output_dir}/.openfmri/{dataset_id}. If
-        not None will create an directory at {alt_output_dir}/{dataset_id}.
+        not None will create an directory at {open_output}/{dataset_id}.
     ignore_subjects: list or None
         List of subject identifiers not to process.
     restrict_subjects: list or None
@@ -136,7 +136,7 @@ def preproc_dataset(data_dir, output_dir, alt_output_dir=None,
         # caching=False,
         )
 
-    _save_to_layout(data_dir, output_dir, preproc, alt_output_dir)
+    _save_to_layout(data_dir, output_dir, preproc, open_output)
 
     return preproc
 
@@ -144,7 +144,7 @@ def preproc_dataset(data_dir, output_dir, alt_output_dir=None,
 def _save_to_layout(data_dir, preproc_dir, preproc, base_output=None):
     """Function to hard link preproc data to an openfmri-like layout.
     """
-    study_id = os.path.split(data_dir.strip('/'))[1]
+    study_id = os.path.split(data_dir.rstrip('/'))[1]
     if base_output is None:
         base_output = _check_dir(
             os.path.join(preproc_dir, '.openfmri', study_id))

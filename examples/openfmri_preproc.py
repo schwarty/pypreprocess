@@ -43,7 +43,13 @@ parser.add_option(
 parser.add_option(
     '-D', '--dartel', dest='dartel',
     default=False, action="store_true",
-    help=('Use dartel.'))
+    help=('Use dartel. WARNING: currently does not work/'))
+
+parser.add_option(
+    '-l', '--open-output', dest='open_output',
+    default=None, help=('Store the preproc results following '
+                        'the openfmri layout at a custom location. '
+                        'Defaults to {output_dir}/.openfmri/{dataset_id}'))
 
 parser.add_option(
     '-n', '--n-jobs', dest='n_jobs', type='int',
@@ -56,6 +62,8 @@ if len(args) < 3:
 input_dir, output_dir = args[1:]
 input_dir = input_dir.rstrip('/')
 output_dir = output_dir.rstrip('/')
+open_output = None if options.open_output is None \
+    else options.open_output.rstrip('/')
 _, dataset_id = os.path.split(input_dir)
 
 if not dataset_id.startswith('ds') and not os.path.exists(input_dir):
@@ -70,6 +78,7 @@ else:
 
 preproc_dataset(data_dir=input_dir,
                 output_dir=output_dir,
+                open_output=open_output,
                 restrict_subjects=restrict,
                 dartel=options.dartel,
                 delete_orient=options.delete_orient,
