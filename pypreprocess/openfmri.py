@@ -133,7 +133,6 @@ def preproc_dataset(data_dir, output_dir, open_output=None,
         deleteorient=delete_orient,
         dartel=dartel,
         dataset_description=DATASET_DESCRIPTION,
-        preproc_params=preproc_params,
         coreg_anat_to_func=True,
         # caching=False,
         )
