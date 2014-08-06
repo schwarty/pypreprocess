@@ -125,14 +125,6 @@ def preproc_dataset(data_dir, output_dir, open_output=None,
             subject_data.output_dir = os.path.join(output_dir, subject_id)
             yield subject_data
 
-
-    # a few additional options
-    preproc_params = {
-        'coreg_func_to_anat': False,
-        'disable_coregister': False,
-        'coregister_software': 'spm',
-    }
-
     preproc = do_subjects_preproc(
         subject_factory(),
         n_jobs=n_jobs,
@@ -142,6 +134,7 @@ def preproc_dataset(data_dir, output_dir, open_output=None,
         dartel=dartel,
         dataset_description=DATASET_DESCRIPTION,
         preproc_params=preproc_params,
+        coreg_anat_to_func=True,
         # caching=False,
         )
 
