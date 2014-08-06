@@ -177,7 +177,7 @@ def _save_to_layout(data_dir, preproc_dir, preproc, base_output=None):
         subject_id = os.path.split(subject_dir)[1]
 
         # link onsets from data folder
-        onsets = os.path.join(subject_dir, 'model', 'model001', 'onsets', '*')
+        onsets = os.path.join(data_dir, subject_id, 'model', 'model001', 'onsets', '*')
         for session_dir in glob.glob(onsets):
             session_id = os.path.split(session_dir)[1]
             onsets_dir = _check_dir(os.path.join(
