@@ -1513,8 +1513,10 @@ def fetch_openfmri(data_dir, dataset_id, force_download=False, verbose=1):
         'ds114': ['ds114_raw'],
         'ds115': ['ds115_sub001-005',
                   'ds115_sub006-009', 'ds115_sub010-014', 'ds115_sub015-019',
-                  'ds115_sub020-024', 'ds115_sub025-029', 'ds115_sub030-034',
-                  'ds115_sub035-039', 'ds115_sub040-044', 'ds115_sub045-049',
+                  'ds115_sub020-024',
+                  # 'ds115_sub025-029', error 404
+                  'ds115_sub030-034', 'ds115_sub035-039', 'ds115_sub040-044',
+                  'ds115_sub045-049',
                   'ds115_sub050-054', 'ds115_sub055-059', 'ds115_sub060-064',
                   'ds115_sub065-069', 'ds115_sub070-074', 'ds115_sub075-079',
                   'ds115_sub080-084', 'ds115_sub085-089', 'ds115_sub090-094',
