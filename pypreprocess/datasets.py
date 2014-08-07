@@ -1530,8 +1530,8 @@ def fetch_openfmri(data_dir, dataset_id, force_download=False, verbose=1):
     system_url = 'https://openfmri.org/system/files/%s'
     aws_url = 'http://openfmri.s3.amazonaws.com/tarballs/%s.tgz'
 
-    urls = [system_url % f for f in system_files.get('dataset_id', [])]
-    urls += [aws_url % f for f in aws_files.get('dataset_id', [])]
+    urls = [system_url % f for f in system_files.get(dataset_id, [])]
+    urls += [aws_url % f for f in aws_files.get(dataset_id, [])]
 
     temp_dir = os.path.join(data_dir, '_%s' % dataset_id, dataset_id)
     output_dir = os.path.join(data_dir, dataset_id)
