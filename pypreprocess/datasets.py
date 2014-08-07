@@ -1482,34 +1482,57 @@ def fetch_spm_multimodal_fmri_data(data_dir, subject_id="sub001"):
 
 
 def fetch_openfmri(data_dir, dataset_id, force_download=False, verbose=1):
-    files = {
-        'ds001': ['ds001_raw_6'],
-        'ds002': ['ds002_raw'],
-        'ds003': ['ds003_raw_1'],
-        'ds005': ['ds005_raw_0'],
-        'ds006A': ['ds006A_raw'],
-        'ds007': ['ds007_raw'],
-        'ds008': ['ds008_raw_4'],
-        'ds011': ['ds011_raw_0'],
-        'ds017A': ['ds017A_raw_0'],
-        'ds017B': ['ds017B_raw_0'],
-        'ds051': ['ds051_raw_0'],
-        'ds052': ['ds052_raw_0'],
-        'ds101': ['ds101_raw_0'],
-        'ds102': ['ds102_raw_0'],
-        'ds105': ['ds105_raw_6'],
-        'ds107': ['ds107_raw_0'],
-        'ds108': ['ds108_raw_part1', 'ds108_raw_part2', 'ds108_raw_part3'],
-        'ds109': ['ds109_raw_4'],
-        'ds110': ['ds110_raw_part1', 'ds110_raw_part2', 'ds110_raw_part3',
-                  'ds110_raw_part4', 'ds110_raw_part5', 'ds110_raw_part6'],
+
+    system_files = {
+        'ds113': ['README_dataset_content.txt', 'study_description.tar'],
+        'ds115': ['ds115_metadata.tgz'],
         }
 
-    if dataset_id not in files:
+    aws_files = {
+        'ds001': ['ds001_raw'],
+        'ds002': ['ds002_raw'],
+        'ds003': ['ds003_raw'],
+        'ds005': ['ds005_raw'],
+        'ds006A': ['ds006A_raw'],
+        'ds007': ['ds007_raw'],
+        'ds008': ['ds008_raw'],
+        'ds009': ['ds009_raw'],
+        'ds011': ['ds011_raw'],
+        'ds017A': ['ds017A_raw'],
+        'ds017B': ['ds017B_raw'],
+        'ds051': ['ds051_raw'],
+        'ds052': ['ds052_raw'],
+        'ds101': ['ds101_raw'],
+        'ds102': ['ds102_raw'],
+        'ds105': ['ds105_raw'],
+        'ds107': ['ds107_raw'],
+        'ds108': ['ds108_raw_part1', 'ds108_raw_part2', 'ds108_raw_part3'],
+        'ds109': ['ds109_raw'],
+        'ds110': ['ds110_raw'],
+        'ds113': ['ds113_sub%03i' % i for i in range(1, 21)],
+        'ds114': ['ds114_raw'],
+        'ds115': ['ds115_sub001-005',
+                  'ds115_sub006-009', 'ds115_sub010-014', 'ds115_sub015-019',
+                  'ds115_sub020-024', 'ds115_sub025-029', 'ds115_sub030-034',
+                  'ds115_sub035-039', 'ds115_sub040-044', 'ds115_sub045-049',
+                  'ds115_sub050-054', 'ds115_sub055-059', 'ds115_sub060-064',
+                  'ds115_sub065-069', 'ds115_sub070-074', 'ds115_sub075-079',
+                  'ds115_sub080-084', 'ds115_sub085-089', 'ds115_sub090-094',
+                  'ds115_sub095-099', 'ds115_sub100-102',
+                  ],
+        'ds116': ['ds116_sub%03i' % i for i in range(1, 18)] + \
+                 ['ds116_metadata'],
+        }
+
+    if not (dataset_id in system_files or dataset_id in aws_files):
         raise Exception('Unknown dataset %s' % dataset_id)
 
-    base_url = 'https://openfmri.org/system/files/%s.tgz'
-    urls = [base_url % f for f in files[dataset_id]]
+    system_url = 'https://openfmri.org/system/files/%s'
+    aws_url = 'http://openfmri.s3.amazonaws.com/tarballs/%s.tgz'
+
+    urls = [system_url % f for f in system_files.get('dataset_id', [])]
+    urls += [aws_url % f for f in aws_files.get('dataset_id', [])]
+
     temp_dir = os.path.join(data_dir, '_%s' % dataset_id, dataset_id)
     output_dir = os.path.join(data_dir, dataset_id)
 
